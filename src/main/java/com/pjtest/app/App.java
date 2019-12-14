@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
@@ -21,13 +20,6 @@ public class App
     
     static class MyHandler implements HttpHandler {
         public void handle(HttpExchange t) throws IOException {
-            InputStream ios = t.getRequestBody();
-
-            Analyzer analyzer = new Analyzer();
-            analyzer.readInput(ios);
-            ArrayList<ArrayList<Integer>> array = analyzer.getList();
-            analyzer.analyzeData();
-
             if(t.getRequestMethod() == "POST"){
                 byte [] response = "Invalid Method".getBytes();
                 t.sendResponseHeaders(405, response.length);
@@ -36,7 +28,13 @@ public class App
                 os.close();
                 return;
             }
-            byte [] response = "Welcome Real's HowTo test page".getBytes();
+
+            InputStream ios = t.getRequestBody();
+            Analyzer analyzer = new Analyzer();
+            analyzer.readInput(ios);
+            SpotsData data = analyzer.analyzeData();
+
+            byte [] response = SpotsData.genJson(data).getBytes();
             t.sendResponseHeaders(200, response.length);
             OutputStream os = t.getResponseBody();
             os.write(response);

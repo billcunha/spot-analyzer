@@ -2,11 +2,8 @@ package com.pjtest.app;
 
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 
 import javax.json.Json;
@@ -33,7 +30,6 @@ class Analyzer {
                 // check if square
                 if(bodyArray.size() != arr.size()){
                     this.list = new ArrayList<ArrayList<Integer>>();
-                    System.out.println("asdasd");
                     return;
                 }
 
@@ -95,39 +91,28 @@ class Analyzer {
     private void trackSpots(int[] point, boolean first) {
         String atual = point[0] + "-" + point[1];
 
-        // Check if neighbor y + 1
-        String nb = point[0] + "-" + (point[1] + 1);
-        if(this.points.containsKey(nb)){
-            if(spots.containsKey(nb)){
-                spots.put(atual, spots.get(nb));
-                return;
-            }else{
-                int spot = actualSpot();
-                if(first){
-                    spot = actualSpot() + 1;
-                }
-                spots.put(atual, spot);
-                spots.put(nb, spot);
-                trackSpots(this.points.get(nb), false);
-                return;
-            }
-        }
+        String[] neighbors = new String[]{
+            point[0] + "-" + (point[1] + 1),
+            (point[0] + 1) + "-" + point[1]
+        };
 
+        // Check if neighbor y + 1
         // Check if neighbor x + 1
-        nb = (point[0] + 1) + "-" + point[1];
-        if(this.points.containsKey(nb)){
-            if(spots.containsKey(nb)){
-                spots.put(atual, spots.get(nb));
-                return;
-            }else{
-                int spot = actualSpot();
-                if(first){
-                    spot = actualSpot() + 1;
+        for(String nb : neighbors){
+            if(this.points.containsKey(nb)){
+                if(spots.containsKey(nb)){
+                    spots.put(atual, spots.get(nb));
+                    return;
+                }else{
+                    int spot = actualSpot();
+                    if(first){
+                        spot = actualSpot() + 1;
+                    }
+                    spots.put(atual, spot);
+                    spots.put(nb, spot);
+                    trackSpots(this.points.get(nb), false);
+                    return;
                 }
-                spots.put(atual, spot);
-                spots.put(nb, spot);
-                trackSpots(this.points.get(nb), false);
-                return;
             }
         }
 
