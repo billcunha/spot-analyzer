@@ -31,7 +31,16 @@ public class App
 
             InputStream ios = t.getRequestBody();
             Analyzer analyzer = new Analyzer();
-            analyzer.readInput(ios);
+            try {
+                analyzer.readInput(ios);
+            } catch(Exception e){
+                byte [] response = e.getMessage().getBytes();
+                t.sendResponseHeaders(400, response.length);
+                OutputStream os = t.getResponseBody();
+                os.write(response);
+                os.close();
+                return;
+            }
             SpotsData data = analyzer.analyzeData();
 
             byte [] response = SpotsData.genJson(data).getBytes();

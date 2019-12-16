@@ -19,28 +19,24 @@ class Analyzer {
         return this.list;
     }
 
-    public void readInput(InputStream input){
-        try {
-            JsonReader reader = Json.createReader(input);
-            JsonArray bodyArray = reader.readArray();
-            reader.close();
-            for (int x = 0; x < bodyArray.size(); x++) {
-                JsonArray arr = bodyArray.getJsonArray(x);
+    public void readInput(InputStream input) throws InvalidMatrixException, Exception {
+        JsonReader reader = Json.createReader(input);
+        JsonArray bodyArray = reader.readArray();
+        reader.close();
+        for (int x = 0; x < bodyArray.size(); x++) {
+            JsonArray arr = bodyArray.getJsonArray(x);
 
-                // check if square
-                if(bodyArray.size() != arr.size()){
-                    this.list = new ArrayList<ArrayList<Integer>>();
-                    return;
-                }
-
-                ArrayList<Integer> local = new ArrayList<Integer>();
-                for (int y = 0; y < arr.size(); y++) {
-                    local.add(arr.getInt(y));
-                }
-                this.list.add(local);
+            // check if square
+            if(bodyArray.size() != arr.size()){
+                this.list = new ArrayList<ArrayList<Integer>>();
+                throw new InvalidMatrixException();
             }
-        } catch(Exception e){
-            System.out.println(e.getMessage());
+
+            ArrayList<Integer> local = new ArrayList<Integer>();
+            for (int y = 0; y < arr.size(); y++) {
+                local.add(arr.getInt(y));
+            }
+            this.list.add(local);
         }
     }
 
