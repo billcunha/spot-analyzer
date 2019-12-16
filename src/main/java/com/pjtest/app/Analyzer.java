@@ -11,8 +11,11 @@ import javax.json.JsonArray;
 import javax.json.JsonReader;
 
 class Analyzer {
+    // Original input array 
     private ArrayList<ArrayList<Integer>> list = new ArrayList<ArrayList<Integer>>();
+    // Map of the points (points make spots)
     private Map<String, int[]> points = new HashMap<String, int[]>();
+    // Map of the spots (group of points)
     private Map<String, Integer> spots = new HashMap<String, Integer>();
 
     public ArrayList<ArrayList<Integer>> getList(){
@@ -23,6 +26,13 @@ class Analyzer {
         JsonReader reader = Json.createReader(input);
         JsonArray bodyArray = reader.readArray();
         reader.close();
+
+        // Check if square
+        if(bodyArray.size() < 2){
+            throw new InvalidMatrixException();
+        }
+
+        // Mount array based on input
         for (int x = 0; x < bodyArray.size(); x++) {
             JsonArray arr = bodyArray.getJsonArray(x);
 
@@ -34,7 +44,11 @@ class Analyzer {
 
             ArrayList<Integer> local = new ArrayList<Integer>();
             for (int y = 0; y < arr.size(); y++) {
-                local.add(arr.getInt(y));
+                try{
+                    local.add(arr.getInt(y));
+                } catch(Exception e) {
+                    throw new InvalidMatrixException();
+                }
             }
             this.list.add(local);
         }
@@ -43,10 +57,7 @@ class Analyzer {
     public SpotsData analyzeData(){
         SpotsData data = new SpotsData();
 
-        if(this.list.size() < 2){
-            return data;
-        }
-
+        // Mount map of points
         for(int x = 0; x < this.list.size(); x++){
             for(int y = 0; y < this.list.get(x).size(); y++){
                 int item = this.list.get(x).get(y);
@@ -57,14 +68,16 @@ class Analyzer {
         }
         data.totalArea = this.points.size();
 
+        // Mount map of spots
         for(Map.Entry<String, int[]> point : this.points.entrySet()){
             if(spots.containsKey(point.getValue()[0] + "-" + point.getValue()[1])){
                 continue;
             }
             trackSpots(point.getValue(), true);
         }
-
         data.numberOfSpots = actualSpot();
+
+
         if(data.totalArea == 0){
             data.spotsAverageArea = 0;
         }else{
@@ -72,6 +85,7 @@ class Analyzer {
         }
 
         int max = 0;
+        // Get the biggest spot
         for(Integer spot : this.spots.values()){
             int temp = Collections.frequency(this.spots.values(), spot);
             if(max < temp){
@@ -95,20 +109,22 @@ class Analyzer {
         // Check if neighbor y + 1
         // Check if neighbor x + 1
         for(String nb : neighbors){
-            if(this.points.containsKey(nb)){
-                if(spots.containsKey(nb)){
-                    spots.put(atual, spots.get(nb));
-                    return;
-                }else{
-                    int spot = actualSpot();
-                    if(first){
-                        spot = actualSpot() + 1;
-                    }
-                    spots.put(atual, spot);
-                    spots.put(nb, spot);
-                    trackSpots(this.points.get(nb), false);
-                    return;
+            if(!this.points.containsKey(nb)){
+                continue;
+            }
+
+            if(spots.containsKey(nb)){
+                spots.put(atual, spots.get(nb));
+                return;
+            }else{
+                int spot = actualSpot();
+                if(first){
+                    spot = actualSpot() + 1;
                 }
+                spots.put(atual, spot);
+                spots.put(nb, spot);
+                trackSpots(this.points.get(nb), false);
+                return;
             }
         }
 

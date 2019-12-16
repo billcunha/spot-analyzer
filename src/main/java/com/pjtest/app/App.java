@@ -13,14 +13,15 @@ public class App
 {
     public static void main(String[] args) throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress(8080), 0);
-        server.createContext("/spot_check", new MyHandler());
-        server.setExecutor(null); // creates a default executor
+        server.createContext("/spot_check", new SpotHandler());
+        server.setExecutor(null);
         server.start();
     }
     
-    static class MyHandler implements HttpHandler {
+    static class SpotHandler implements HttpHandler {
         public void handle(HttpExchange t) throws IOException {
-            if(t.getRequestMethod() == "POST"){
+            // Only accepts POST
+            if(!t.getRequestMethod().equalsIgnoreCase("POST")){
                 byte [] response = "Invalid Method".getBytes();
                 t.sendResponseHeaders(405, response.length);
                 OutputStream os = t.getResponseBody();
